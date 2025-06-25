@@ -1,0 +1,12 @@
+[Unit]
+Description=Telegram Bot
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/go run /app/bot
+WorkingDirectory=/app
+Restart=always
+User=bot_admin
+
+[Install]
+WantedBy=multi-user.target

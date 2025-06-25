@@ -1,0 +1,54 @@
+services:
+  app:
+    image: hubusername/deploy-demo-app:latest
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    networks:
+      - demo-network
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - demo-network
+    restart: unless-stopped
+  migration:
+    image: hubusername/deploy-demo-migration:latest
+    pull_policy: always
+    env_file:
+      - .env
+    networks:
+      - demo-network
+    depends_on: 
+      db:
+        condition: service_healthy
+        restart: true
+    ports:
+      - 8080:8080
+  bot:
+    image: hubusername/deploy-demo-bot:latest
+    env_file:
+      - .env
+    networks:
+      - demo-network
+    depends_on: 
+      db:
+        condition: service_healthy
+        restart: true
+
+volumes:
+  postgres-data:
+
+networks:
+  demo-network:
+     driver: bridge

@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,28 +9,29 @@ datasource db {
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
     // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+    url      = env("POSTGRES_URL")
 }
 
 model Post {
     id        Int      @id @default(autoincrement())
     name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
+    createdById String @map("created_by_id")
 
     @@index([name])
+    @@map("post")
 }
 
 // Necessary for Next auth
 model Account {
     id                       String  @id @default(cuid())
-    userId                   String
+    userId                   String  @map("user_id")
     type                     String
     provider                 String
-    providerAccountId        String
+    providerAccountId        String  @map("provider_account_id")
     refresh_token            String? // @db.Text
     access_token             String? // @db.Text
     expires_at               Int?
@@ -44,25 +43,30 @@ model Account {
     refresh_token_expires_in Int?
 
     @@unique([provider, providerAccountId])
+    @@map("account")
 }
 
 model Session {
     id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
+    sessionToken String   @unique @map("session_token")
+    userId       String   @map("user_id")
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("session")
 }
 
 model User {
     id            String    @id @default(cuid())
     name          String?
     email         String?   @unique
-    emailVerified DateTime?
+    emailVerified DateTime? @map("email_verified")
     image         String?
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+
+    @@map("user")
 }
 
 model VerificationToken {
@@ -71,4 +75,5 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+    @@map("verification_token")
 }
