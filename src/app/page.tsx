@@ -1,11 +1,10 @@
 import Link from "next/link";
 
-import { LatestPost } from "@/app/_components/post";
+import { Post } from "@/app/_components/post";
 import { auth } from "@/server/auth";
 import { api, HydrateClient } from "@/trpc/server";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "от trpc" });
   const session = await auth();
 
   if (session?.user) {
@@ -14,27 +13,27 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Загрузка запроса tRPC..."}
-            </p>
-
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Пользователь: {session.user?.name}</span>}
-              </p>
+      <main className="flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+        <div className="w-full border-b border-gray-700">
+          <div className="container mx-auto flex items-center justify-end p-4">
+            <div className="flex items-center space-x-4">
+              {session && (
+                <span className="text-lg font-medium">
+                  {session.user?.name}
+                </span>
+              )}
               <Link
                 href={session ? "/api/auth/signout" : "/api/auth/signin"}
-                className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
+                className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold no-underline transition hover:bg-white/20"
               >
-                {session ? "Войти" : "Выйти"}
+                {session ? "Выйти" : "Войти"}
               </Link>
             </div>
           </div>
+        </div>
 
-          {session?.user && <LatestPost />}
+        <div className="container flex flex-grow flex-col items-center justify-center px-4 py-8">
+          {session?.user && <Post />}
         </div>
       </main>
     </HydrateClient>

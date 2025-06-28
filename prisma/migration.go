@@ -24,8 +24,9 @@ type User struct {
 }
 
 type Post struct {
-	ID          int       `gorm:"primaryKey;autoIncrement"`
-	Name        string    `gorm:"type:varchar(255);index"`
+	ID          int    `gorm:"primaryKey;autoIncrement"`
+	Name        string `gorm:"type:varchar(255);index"`
+	Content     string
 	CreatedAt   time.Time `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP"`
 	UpdatedAt   time.Time `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP"`
 	CreatedBy   User      `gorm:"foreignKey:CreatedByID"`
